@@ -205,7 +205,7 @@ func getStateStr(percent uint64) string {
 	if percent > 95 {
 		return "良好"
 	}
-	if percent > 80 {
+	if percent > 50 {
 		return "低可用"
 	}
 	return "故障"
@@ -269,7 +269,7 @@ func (ss *ServiceSentinel) worker() {
 		if Conf.Debug {
 			log.Println(ss.monitors[mh.MonitorID].Target, stateStr, "Reporter:", r.Reporter, "Successful:", mh.Successful, "Data:", mh.Data)
 		}
-		if stateStr == "故障" || stateStr != ss.lastStatus[mh.MonitorID] {
+		if stateStr == "故障" || "故障" == ss.lastStatus[mh.MonitorID] {
 			ss.monitorsLock.RLock()
 			isSendNotification := (ss.lastStatus[mh.MonitorID] != "" || stateStr == "故障") && ss.monitors[mh.MonitorID].Notify
 			ss.lastStatus[mh.MonitorID] = stateStr
