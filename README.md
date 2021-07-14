@@ -1,14 +1,15 @@
-<div align="center" style="background-color: white">
-  <img width="500" style="max-width:100%" src="https://raw.githubusercontent.com/naiba/nezha/master/resource/static/brand.png" title="哪吒监控">
+<div align="center">
+  <img width="500" style="max-width:100%" src="resource/static/brand.png" title="哪吒监控">
   <br><br>
-<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.6.7&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.5.0-brightgreen?style=for-the-badge&logo=linux">
+<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.8.6&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.6.4-brightgreen?style=for-the-badge&logo=linux">
   <br>
-  <p>:trollface: 哪吒监控 一站式轻监控轻运维系统。支持系统状态、HTTP(SSL 证书变更、即将到期、到期)、TCP、Ping 监控报警，命令批量执行和计划任务。</p>	
+  <br>
+  <p>:trollface: <b>哪吒监控</b> 一站式轻监控轻运维系统。支持系统状态、HTTP(SSL 证书变更、即将到期、到期)、TCP、Ping 监控报警，命令批量执行和计划任务。</p>	
 </div>
 
 \>> QQ 交流群：872069346 **加群要求：已搭建好哪吒监控 & 有 2+ 服务器**
 
-\>> [我们的用户](https://www.google.com/search?q="powered+by+哪吒监控%7C哪吒面板"&filter=0) (Google)
+\>> [我们的用户](https://www.google.com/search?q="powered+by+哪吒监控"&filter=0) (Google)
 
 | 默认主题                                                | DayNight [@JackieSung](https://github.com/JackieSung4ev) | hotaru                                                                 |
 | ------------------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------- |
@@ -16,18 +17,18 @@
 
 ## 安装脚本
 
-**推荐配置：** 安装前解析 _两个域名_ 到面板服务器，一个作为 _公开访问_ ，可以 **接入 CDN**，比如 (status.nai.ba)；另外一个作为安装 Agent 时连接 Dashboard 使用，**不能接入 CDN** 直接暴露面板主机 IP，比如（randomdashboard.nai.ba）。
+**推荐配置：** 安装前准备 _两个域名_，一个可以 **接入 CDN** 作为 _公开访问_，比如 (status.nai.ba)；另外一个解析到面板服务器作为 Agent 连接 Dashboard 使用，**不能接入 CDN** 直接暴露面板主机 IP，比如（randomdashboard.nai.ba）。
 
 ```shell
-curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod +x nezha.sh
-./nezha.sh
+curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh  -o nezha.sh && chmod +x nezha.sh
+sudo ./nezha.sh
 ```
 
 国内镜像加速：
 
 ```shell
 curl -L https://cdn.jsdelivr.net/gh/naiba/nezha@master/script/install.sh -o nezha.sh && chmod +x nezha.sh
-CN=true ./nezha.sh
+CN=true sudo ./nezha.sh
 ```
 
 _\* 使用 WatchTower 可以自动更新面板，Windows 终端可以使用 nssm 配置自启动（见尾部教程）_
@@ -57,11 +58,13 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 1. 添加通知方式
 
    - server 酱示例
+
      - 名称：server 酱
      - URL：https://sc.ftqq.com/SCUrandomkeys.send?text=#NEZHA#
      - 请求方式: GET
      - 请求类型: 默认
      - Body: 空
+
    - wxpusher 示例，需要关注你的应用
 
      - 名称: wxpusher
@@ -71,6 +74,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
      - Body: `{"appToken":"你的appToken","topicIds":[],"content":"#NEZHA#","contentType":"1","uids":["你的uid"]}`
 
    - telegram 示例 [@haitau](https://github.com/haitau) 贡献
+
      - 名称：telegram 机器人消息通知
      - URL：https://api.telegram.org/botXXXXXX/sendMessage?chat_id=YYYYYY&text=#NEZHA#
      - 请求方式: GET
@@ -97,7 +101,10 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
   - net_in_speed(入站网速)、net_out_speed(出站网速)、net_all_speed(双向网速)、transfer_in(入站流量)、transfer_out(出站流量)、transfer_all(双向流量)：Min/Max 数值为字节（1kb=1024，1mb = 1024\*1024）
   - offline：不支持 Min/Max 参数
 - Duration：持续秒数，监控比较简陋，取持续时间内的 70% 采样结果
-- Ignore: `{"1": true, "2":false}` 忽略此规则的服务器 ID 列表
+- Cover `[{"Type":"offline","Duration":10, "Cover":0, "Ignore":{"5": true}}]`
+  - `0` 监控所有，通过 `Ignore` 忽略特定服务器
+  - `1` 忽略所有，通过 `Ignore` 监控特定服务器
+- Ignore: `{"1": true, "2":false}` 特定服务器，搭配 `Cover` 使用
 </details>
 
 <details>
@@ -120,7 +127,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
   </style>
   ```
 
-- DayNight 主题更改进度条颜色示例（来自 [@hyt-allen-xu](https://github.com/hyt-allen-xu)，欢迎 PR）
+- DayNight 主题更改进度条颜色示例（来自 [@hyt-allen-xu](https://github.com/hyt-allen-xu)）
 
   ```
   <style>
@@ -130,7 +137,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
   </style>
   ```
 
-- 默认主题修改 LOGO、移除版权示例（来自 [@iLay1678](https://github.com/iLay1678)，欢迎 PR）
+- 默认主题修改 LOGO、移除版权示例（来自 [@iLay1678](https://github.com/iLay1678)）
 
   ```
   <style>
@@ -155,8 +162,9 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
   }
   </script>
   ```
-- DayNight 移除版权示例（来自 [@hyt-allen-xu](https://github.com/hyt-allen-xu)，欢迎 PR）
-  
+
+- DayNight 移除版权示例（来自 [@hyt-allen-xu](https://github.com/hyt-allen-xu)）
+
   ```
   <script>
   window.onload = function(){
@@ -169,13 +177,13 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 
 - hotaru 主题更改背景图片示例
 
-      ```
-      <style>
-      .hotaru-cover {
-          background: url(https://s3.ax1x.com/2020/12/08/DzHv6A.jpg) center;
-      }
-      </style>
-      ```
+  ```
+  <style>
+  .hotaru-cover {
+     background: url(https://s3.ax1x.com/2020/12/08/DzHv6A.jpg) center;
+  }
+  </style>
+  ```
 
 </details>
 
@@ -191,7 +199,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 <details>
     <summary>如何使 OpenWrt/LEDE 自启动？来自 @艾斯德斯</summary>
 
-首先在 release 下载对应的二进制解压后放置到 `/root/nezha-agent`，然后 `chmod +x /root/nezha-agent` 赋予执行权限，然后创建 `/etc/init.d/nezha-agent`：
+首先在 release 下载对应的二进制解压 tar.gz 包后放置到 `/root`，然后 `chmod +x /root/nezha-agent` 赋予执行权限，然后创建 `/etc/init.d/nezha-service`：
 
 ```
 #!/bin/sh /etc/rc.common
@@ -201,7 +209,7 @@ USE_PROCD=1
 
 start_service() {
 	procd_open_instance
-	procd_set_param command /root/nezha-agent -i xxx -p 111 -d
+	procd_set_param command /root/nezha-agent -s 面板网址:接收端口 -p 唯一秘钥 -d
 	procd_set_param respawn
 	procd_close_instance
 }
@@ -217,7 +225,7 @@ restart() {
 }
 ```
 
-赋予执行权限 `chmod +x /etc/init.d/nezha-agent` 然后启动服务 `/etc/init.d/nezha-agent enable && /etc/init.d/nezha-agent start`
+赋予执行权限 `chmod +x /etc/init.d/nezha-service` 然后启动服务 `/etc/init.d/nezha-service enable && /etc/init.d/nezha-service start`
 
 </details>
 
@@ -244,6 +252,7 @@ restart() {
   ```nginx
   server{
 
+      #原有的一些配置
       #server_name blablabla...
 
       location /ws {
@@ -273,4 +282,4 @@ restart() {
 - [哪吒探针 - Windows 客户端安装](https://nyko.me/2020/12/13/nezha-windows-client.html)
 - [哪吒监控，一个便携服务器状态监控面板搭建教程，不想拥有一个自己的探针吗？](https://haoduck.com/644.html)
 - [哪吒监控：小鸡们的最佳探针](https://www.zhujizixun.com/2843.html) _（已过时）_
-- [>>更多教程](https://www.google.com/search?q="哪吒"%2B"面板%7C监控%7C探针"+"教程") (Google)
+- [>>更多教程](https://www.google.com/search?q="哪吒监控"+"教程") (Google)

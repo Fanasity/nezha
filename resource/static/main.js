@@ -1,7 +1,10 @@
 function readableBytes(bytes) {
+  if (!bytes) {
+    return '0B'
+  }
   var i = Math.floor(Math.log(bytes) / Math.log(1024)),
     sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-  return (bytes / Math.pow(1024, i)).toFixed(0) + " " + sizes[i];
+  return parseFloat((bytes / Math.pow(1024, i)).toFixed(2)) + sizes[i];
 }
 
 const confirmBtn = $(".mini.confirm.modal .positive.button");
@@ -41,61 +44,53 @@ function showFormModal(modelSelector, formID, URL, getData) {
         const data = getData
           ? getData()
           : $(formID)
-              .serializeArray()
-              .reduce(function (obj, item) {
-                // ID 类的数据
-                if (
-                  item.name.endsWith("_id") ||
-                  item.name === "id" ||
-                  item.name === "ID" ||
-                  item.name === "RequestType" ||
-                  item.name === "RequestMethod" ||
-                  item.name === "DisplayIndex" ||
-                  item.name === "Type"
-                ) {
-                  obj[item.name] = parseInt(item.value);
-                } else {
-                  obj[item.name] = item.value;
-                }
+            .serializeArray()
+            .reduce(function (obj, item) {
+              // ID 类的数据
+              if (
+                item.name.endsWith("_id") ||
+                item.name === "id" ||
+                item.name === "ID" ||
+                item.name === "RequestType" ||
+                item.name === "RequestMethod" ||
+                item.name === "DisplayIndex" ||
+                item.name === "Type" ||
+                item.name === "Cover"
+              ) {
+                obj[item.name] = parseInt(item.value);
+              } else {
+                obj[item.name] = item.value;
+              }
 
-                if (item.name.endsWith("ServersRaw")) {
-                  if (item.value.length > 2) {
-                    obj[item.name] = JSON.stringify(
-                      [...item.value.matchAll(/\d+/gm)].map((k) =>
-                        parseInt(k[0])
-                      )
-                    );
-                  }
+              if (item.name.endsWith("ServersRaw")) {
+                if (item.value.length > 2) {
+                  obj[item.name] = JSON.stringify(
+                    [...item.value.matchAll(/\d+/gm)].map((k) =>
+                      parseInt(k[0])
+                    )
+                  );
                 }
+              }
 
-                return obj;
-              }, {});
+              return obj;
+            }, {});
         $.post(URL, JSON.stringify(data))
           .done(function (resp) {
             if (resp.code == 200) {
-              if (resp.message) {
-                $.suiAlert({
-                  title: "操作成功",
-                  type: "success",
-                  description: resp.message,
-                  time: "3",
-                  position: "top-center",
-                });
-              }
-              window.location.reload();
+              window.location.reload()
             } else {
               form.append(
                 `<div class="ui negative message"><div class="header">操作失败</div><p>` +
-                  resp.message +
-                  `</p></div>`
+                resp.message +
+                `</p></div>`
               );
             }
           })
           .fail(function (err) {
             form.append(
               `<div class="ui negative message"><div class="header">网络错误</div><p>` +
-                err.responseText +
-                `</p></div>`
+              err.responseText +
+              `</p></div>`
             );
           })
           .always(function () {
@@ -197,6 +192,7 @@ function addOrEditMonitor(monitor) {
   modal.find("input[name=Name]").val(monitor ? monitor.Name : null);
   modal.find("input[name=Target]").val(monitor ? monitor.Target : null);
   modal.find("select[name=Type]").val(monitor ? monitor.Type : 1);
+  modal.find("select[name=Cover]").val(monitor ? monitor.Cover : 0);
   if (monitor && monitor.Notify) {
     modal.find(".ui.nb-notify.checkbox").checkbox("set checked");
   } else {
@@ -210,10 +206,10 @@ function addOrEditMonitor(monitor) {
     for (let i = 0; i < serverList.length; i++) {
       node.after(
         '<a class="ui label transition visible" data-value="' +
-          serverList[i] +
-          '" style="display: inline-block !important;">ID:' +
-          serverList[i] +
-          '<i class="delete icon"></i></a>'
+        serverList[i] +
+        '" style="display: inline-block !important;">ID:' +
+        serverList[i] +
+        '<i class="delete icon"></i></a>'
       );
     }
   }
@@ -245,10 +241,10 @@ function addOrEditCron(cron) {
     for (let i = 0; i < serverList.length; i++) {
       node.after(
         '<a class="ui label transition visible" data-value="' +
-          serverList[i] +
-          '" style="display: inline-block !important;">ID:' +
-          serverList[i] +
-          '<i class="delete icon"></i></a>'
+        serverList[i] +
+        '" style="display: inline-block !important;">ID:' +
+        serverList[i] +
+        '<i class="delete icon"></i></a>'
       );
     }
   }
@@ -367,5 +363,5 @@ $(document).ready(() => {
         cache: false,
       },
     });
-  } catch (error) {}
+  } catch (error) { }
 });

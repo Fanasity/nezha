@@ -15,7 +15,6 @@ import (
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/mygin"
 	"github.com/naiba/nezha/pkg/utils"
-	pb "github.com/naiba/nezha/proto"
 	"github.com/naiba/nezha/service/dao"
 )
 
@@ -196,6 +195,7 @@ type monitorForm struct {
 	Name           string
 	Target         string
 	Type           uint8
+	Cover          uint8
 	Notify         string
 	SkipServersRaw string
 }
@@ -210,6 +210,7 @@ func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
 		m.Type = mf.Type
 		m.ID = mf.ID
 		m.SkipServersRaw = mf.SkipServersRaw
+		m.Cover = mf.Cover
 		m.Notify = mf.Notify == "on"
 	}
 	if err == nil {
@@ -239,6 +240,7 @@ type cronForm struct {
 	Scheduler      string
 	Command        string
 	ServersRaw     string
+	Cover          uint8
 	PushSuccessful string
 }
 
@@ -253,6 +255,7 @@ func (ma *memberAPI) addOrEditCron(c *gin.Context) {
 		cr.ServersRaw = cf.ServersRaw
 		cr.PushSuccessful = cf.PushSuccessful == "on"
 		cr.ID = cf.ID
+		cr.Cover = cf.Cover
 		err = json.Unmarshal([]byte(cf.ServersRaw), &cr.Servers)
 	}
 	if err == nil {
@@ -281,21 +284,10 @@ func (ma *memberAPI) addOrEditCron(c *gin.Context) {
 		dao.Cron.Remove(crOld.CronID)
 	}
 
-	cr.CronID, err = dao.Cron.AddFunc(cr.Scheduler, func() {
-		dao.ServerLock.RLock()
-		defer dao.ServerLock.RUnlock()
-		for j := 0; j < len(cr.Servers); j++ {
-			if dao.ServerList[cr.Servers[j]].TaskStream != nil {
-				dao.ServerList[cr.Servers[j]].TaskStream.Send(&pb.Task{
-					Id:   cr.ID,
-					Data: cr.Command,
-					Type: model.TaskTypeCommand,
-				})
-			} else {
-				dao.SendNotification(fmt.Sprintf("计划任务：%s，服务器：%d 离线，无法执行。", cr.Name, cr.Servers[j]), false)
-			}
-		}
-	})
+	cr.CronID, err = dao.Cron.AddFunc(cr.Scheduler, dao.CronTrigger(cr))
+	if err != nil {
+		panic(err)
+	}
 
 	delete(dao.Crons, cr.ID)
 	dao.Crons[cr.ID] = &cr
@@ -315,7 +307,7 @@ func (ma *memberAPI) manualTrigger(c *gin.Context) {
 		return
 	}
 
-	dao.CronTrigger(&cr)
+	dao.ManualTrigger(&cr)
 
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
@@ -457,6 +449,7 @@ type settingForm struct {
 	EnableIPChangeNotification string
 	IgnoredIPNotification      string
 	Oauth2Type                 string
+	Cover                      uint8
 }
 
 func (ma *memberAPI) updateSetting(c *gin.Context) {
@@ -469,6 +462,7 @@ func (ma *memberAPI) updateSetting(c *gin.Context) {
 		return
 	}
 	dao.Conf.EnableIPChangeNotification = sf.EnableIPChangeNotification == "on"
+	dao.Conf.Cover = sf.Cover
 	dao.Conf.IgnoredIPNotification = sf.IgnoredIPNotification
 	dao.Conf.Site.Brand = sf.Title
 	dao.Conf.Site.Theme = sf.Theme
