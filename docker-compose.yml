@@ -1,0 +1,10 @@
+version: "3"
+services:
+  golang:
+    build: .
+    ports:
+      - 8668:80
+      - 8669:5555
+    volumes:
+      - ./:/dashboard
+    tty: true

@@ -91,7 +91,7 @@ func ServeWeb(port uint) {
 			if percent > 95 {
 				return "good"
 			}
-			if percent > 80 {
+			if percent > 50 {
 				return "warning"
 			}
 			return "danger"
@@ -103,7 +103,7 @@ func ServeWeb(port uint) {
 			if percent > 95 {
 				return "良好"
 			}
-			if percent > 80 {
+			if percent > 50 {
 				return "低可用"
 			}
 			return "故障"

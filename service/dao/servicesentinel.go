@@ -293,11 +293,11 @@ func (ss *ServiceSentinel) worker() {
 		var errMsg string
 		if strings.HasPrefix(mh.Data, "SSL证书错误：") {
 			// 排除 i/o timeont、connection timeout、EOF 错误
-			if !strings.HasSuffix(mh.Data, "timeout") &&
-				!strings.HasSuffix(mh.Data, "EOF") &&
-				!strings.HasSuffix(mh.Data, "timed out") {
-				errMsg = mh.Data
-			}
+			//if !strings.HasSuffix(mh.Data, "timeout") &&
+			//	!strings.HasSuffix(mh.Data, "EOF") &&
+			//	!strings.HasSuffix(mh.Data, "timed out") {
+			//	errMsg = mh.Data
+			//}
 		} else {
 			var newCert = strings.Split(mh.Data, "|")
 			if len(newCert) > 1 {
@@ -312,17 +312,17 @@ func (ss *ServiceSentinel) worker() {
 						expiresNew.Format("2006-01-02 15:04:05"))
 				}
 				// 证书变更提醒
-				var oldCert = strings.Split(ss.sslCertCache[mh.MonitorID], "|")
-				var expiresOld time.Time
-				if len(oldCert) > 1 {
-					expiresOld, _ = time.Parse("2006-01-02 15:04:05 -0700 MST", oldCert[1])
-				}
-				if oldCert[0] != newCert[0] && !expiresNew.Equal(expiresOld) {
-					ss.sslCertCache[mh.MonitorID] = mh.Data
-					errMsg = fmt.Sprintf(
-						"SSL证书变更，旧：%s, %s 过期；新：%s, %s 过期。",
-						oldCert[0], expiresOld.Format("2006-01-02 15:04:05"), newCert[0], expiresNew.Format("2006-01-02 15:04:05"))
-				}
+				//var oldCert = strings.Split(ss.sslCertCache[mh.MonitorID], "|")
+				//var expiresOld time.Time
+				//if len(oldCert) > 1 {
+				//	expiresOld, _ = time.Parse("2006-01-02 15:04:05 -0700 MST", oldCert[1])
+				//}
+				//if oldCert[0] != newCert[0] && !expiresNew.Equal(expiresOld) {
+				//	ss.sslCertCache[mh.MonitorID] = mh.Data
+				//	errMsg = fmt.Sprintf(
+				//		"SSL证书变更，旧：%s, %s 过期；新：%s, %s 过期。",
+				//		oldCert[0], expiresOld.Format("2006-01-02 15:04:05"), newCert[0], expiresNew.Format("2006-01-02 15:04:05"))
+				//}
 			}
 		}
 		if errMsg != "" {
